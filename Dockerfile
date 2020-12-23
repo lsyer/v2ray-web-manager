@@ -2,6 +2,8 @@ FROM openjdk:8-jre
 
 RUN set -x && \
   echo "Asia/Shanghai" > /etc/timezone && \
+  sed -i 's/deb.debian.org/mirrors.163.com/g' /etc/apt/sources.list && \
+  sed -i 's/security.debian.org/mirrors.163.com/g' /etc/apt/sources.list && \
   apt-get update && \
   apt-get install -y nginx && \
   mkdir -p /opt/jar/db/ && \
