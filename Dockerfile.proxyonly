@@ -1,0 +1,34 @@
+FROM openjdk:8-jre
+
+RUN set -x && \
+  echo "Asia/Shanghai" > /etc/timezone && \
+  sed -i 's/deb.debian.org/mirrors.163.com/g' /etc/apt/sources.list && \
+  sed -i 's/security.debian.org/mirrors.163.com/g' /etc/apt/sources.list && \
+  apt-get update && \
+  apt-get install -y nginx tzdata openssl ca-certificates && \
+  mkdir -p /opt/jar/db/ && \
+  chown 1000:nogroup /opt/jar/db/ && \
+  mkdir -p /opt/jar/web/ && \
+  chown 1000:nogroup /opt/jar/web/ && \
+  mkdir -p /opt/conf/ && \
+  chown 1000:nogroup /opt/conf/
+
+ADD --chown=1000:nogroup ./v2ray-proxy.jar /opt/jar/v2ray-proxy.jar
+ADD --chown=1000:nogroup ./conf/proxy.yaml /opt/conf/proxy.yaml
+ADD --chown=1000:nogroup ./conf/config.json /opt/jar/config.json
+ADD --chown=1000:nogroup ./init_proxyonly.sh /opt/jar/run.sh
+ADD --chown=root:root ./conf/v2ray-mng_proxyonly.conf /opt/conf/v2ray-mng_proxyonly.conf
+
+RUN cd /opt/jar/ && \
+  chmod +x /opt/jar/v2ray-proxy.jar && \
+  chmod +x /opt/jar/run.sh
+
+WORKDIR /root
+ADD --chown=1000:nogroup ./v2ray.sh /root/v2ray.sh
+RUN set -ex \
+	&& mkdir -p /etc/v2ray /usr/local/share/v2ray /var/log/v2ray \
+	&& chmod +x /root/v2ray.sh \
+	&& /root/v2ray.sh
+
+WORKDIR /opt/jar/
+CMD ["/bin/sh", "run.sh"]

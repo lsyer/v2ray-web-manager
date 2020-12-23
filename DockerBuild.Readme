@@ -1,0 +1,9 @@
+docker build --tag=v2ray-manager-master -f ./Dockerfile.masteronly .
+
+# 编译proxy镜像时需要注意v2ray.sh中第43行，将https_proxy改为可用的科学上网代理
+docker build --tag=v2ray-manager-proxy -f ./Dockerfile.proxyonly .
+
+# 运行master节点
+docker run -d --name v2-master --net=host -v ~/conf-master:/opt/conf v2ray-manager-master
+# 运行proxy节点，若与master在同一台主机，注意conf/v2ray-mng_proxyonly.conf中的nginx端口号与master节点冲突
+docker run -d --name v2-proxy --net=host -v ~/conf-proxy:/opt/conf v2ray-manager-proxy
